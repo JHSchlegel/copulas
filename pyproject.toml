@@ -89,7 +89,7 @@ select = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["copulas"]
+known-first-party = ["copulalib"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
