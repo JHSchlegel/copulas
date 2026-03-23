@@ -12,6 +12,7 @@ Author:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -28,8 +29,30 @@ class Distribution(ABC):
     closed-form density (e.g. truncated log-normal, empirical).
     """
 
+    def __init__(self) -> None:
+        self._fitted: bool = False
+
+    def fit(self, data: ArrayLike, **kwargs: Any) -> Distribution:
+        """Estimate parameters from data.
+
+        Calls the subclass implementation via ``_fit`` and then sets
+        ``self._fitted = True``.
+
+        Parameters
+        ----------
+        data : array_like
+            Univariate sample.
+
+        Returns
+        -------
+        self
+        """
+        result = self._fit(data, **kwargs)
+        self._fitted = True
+        return result
+
     @abstractmethod
-    def fit(self, data: ArrayLike) -> Distribution:
+    def _fit(self, data: ArrayLike, **kwargs: Any) -> Distribution:
         """Estimate parameters from data.
 
         Parameters
@@ -43,7 +66,7 @@ class Distribution(ABC):
         """
 
     @abstractmethod
-    def cdf(self, x: ArrayLike) -> NDArray[np.float64]:
+    def cdf(self, x: ArrayLike, **kwargs: Any) -> NDArray[np.float64]:
         """Cumulative distribution function (probability integral
         transform).
 
@@ -59,7 +82,7 @@ class Distribution(ABC):
         """
 
     @abstractmethod
-    def ppf(self, q: ArrayLike) -> NDArray[np.float64]:
+    def ppf(self, q: ArrayLike, **kwargs: Any) -> NDArray[np.float64]:
         """Percent-point function (inverse CDF / quantile function).
 
         Parameters
@@ -74,7 +97,7 @@ class Distribution(ABC):
         """
 
     @abstractmethod
-    def sample(self, n: int) -> NDArray[np.float64]:
+    def sample(self, n: int, **kwargs: Any) -> NDArray[np.float64]:
         """Draw random samples.
 
         Parameters
@@ -88,7 +111,7 @@ class Distribution(ABC):
             Array of shape ``(n,)``.
         """
 
-    def pdf(self, x: ArrayLike) -> NDArray[np.float64]:
+    def pdf(self, x: ArrayLike, **kwargs: Any) -> NDArray[np.float64]:
         """Probability density function.
 
         Optional — raises ``NotImplementedError`` by default.
@@ -97,9 +120,24 @@ class Distribution(ABC):
             f"{type(self).__name__} does not implement pdf."
         )
 
-    def logpdf(self, x: ArrayLike) -> NDArray[np.float64]:
+    def logpdf(self, x: ArrayLike, **kwargs: Any) -> NDArray[np.float64]:
         """Log probability density function.
 
         Falls back to ``log(pdf(x))`` if not overridden.
         """
         return np.log(self.pdf(x))
+
+    # -------------------------------------------------------------------------
+    # Helpers
+    # -------------------------------------------------------------------------
+    def _check_fitted(self) -> None:
+        """Raise if ``fit`` has not been called yet."""
+        if not self._fitted:
+            raise RuntimeError(
+                f"{type(self).__name__}: call fit() before using "
+                f"this distribution."
+            )
+
+    def __repr__(self) -> str:
+        status = "fitted" if self._fitted else "unfitted"
+        return f"{type(self).__name__}({status})"
