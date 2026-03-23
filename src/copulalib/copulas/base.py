@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -54,6 +55,7 @@ class Copula(ABC):
         self,
         data: ArrayLike,
         marginals: list[Marginal],
+        **kwargs: Any,
     ) -> Copula:
         """Fit the copula to data.
 
@@ -70,7 +72,7 @@ class Copula(ABC):
         """
 
     @abstractmethod
-    def sample(self, n: int) -> NDArray[np.float64]:
+    def sample(self, n: int, **kwargs: Any) -> NDArray[np.float64]:
         """Draw samples in uniform space.
 
         Parameters
@@ -85,7 +87,7 @@ class Copula(ABC):
         """
 
     @abstractmethod
-    def cdf(self, u: ArrayLike) -> NDArray[np.float64]:
+    def cdf(self, u: ArrayLike, **kwargs: Any) -> NDArray[np.float64]:
         """Copula CDF.
 
         Parameters
@@ -99,7 +101,7 @@ class Copula(ABC):
             Copula CDF values.
         """
 
-    def pdf(self, u: ArrayLike) -> NDArray[np.float64]:
+    def pdf(self, u: ArrayLike, **kwargs: Any) -> NDArray[np.float64]:
         """Copula density.
 
         Optional — raises ``NotImplementedError`` by default.
@@ -108,7 +110,7 @@ class Copula(ABC):
             f"{type(self).__name__} does not implement pdf."
         )
 
-    def logpdf(self, u: ArrayLike) -> NDArray[np.float64]:
+    def logpdf(self, u: ArrayLike, **kwargs: Any) -> NDArray[np.float64]:
         """Log copula density.
 
         Falls back to ``log(pdf(u))`` if not overridden.
