@@ -1,0 +1,95 @@
+# --------------------------------------------------------------------------- #
+#                                BUILD SYSTEM                                 #
+# --------------------------------------------------------------------------- #
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools >=64.0.0",
+    "wheel >=0.40.0",
+]
+
+
+# --------------------------------------------------------------------------- #
+#                           PROJECT AND DEPENDENCIES                          #
+# --------------------------------------------------------------------------- #
+
+[project]
+name = "copulas"
+version = "0.1.0"
+description = "A simple modular copula package."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT License"}
+authors = [{name = "Jan Schlegel", email = "jschlegel@student.ethz.ch"}]
+keywords = ["copulas", "statistics", "multivariate distributions"]
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy",
+    "ruff",
+    "pytest",
+    "pytest-cov",
+    "pre-commit",
+    "ipykernel",
+]
+
+[project.urls]
+Homepage = "https://github.com/jhschlegel/copulas"
+Issues = "https://github.com/jhschlegel/copulas/issues"
+
+
+# --------------------------------------------------------------------------- #
+#                          TOOL CONFIGURATION                                 #
+# --------------------------------------------------------------------------- #
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_ignores = true
+warn_unused_configs = true
+warn_return_any = true
+warn_redundant_casts = true
+warn_unreachable = false
+ignore_missing_imports = true
+disallow_untyped_calls = true
+no_implicit_optional = true
+disallow_untyped_defs = true
+
+[tool.pyright]
+pythonVersion = "3.11"
+reportPrivateImportUsage = "none"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+testpaths = [
+    "tests",
+]
+
+[tool.ruff]
+line-length = 79
+target-version = "py311"
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort (ruff replaces standalone isort)
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["copulas"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
