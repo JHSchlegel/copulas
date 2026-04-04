@@ -48,9 +48,9 @@ class EmpiricalDistribution(Distribution):
         self._data: NDArray[np.float64] | None = None
         self._n: int = 0
 
-    # ------------------------------------------------------------------ #
-    #  Fitting                                                             #
-    # ------------------------------------------------------------------ #
+    # -------------------------------------------------------------------------
+    #  Fitting
+    # -------------------------------------------------------------------------
     def _fit(self, data: ArrayLike, **kwargs: Any) -> EmpiricalDistribution:
         """Sort and store the sample as order statistics.
 
@@ -70,9 +70,9 @@ class EmpiricalDistribution(Distribution):
         self._n = len(self._data)
         return self
 
-    # ------------------------------------------------------------------ #
-    #  CDF  —  F(x) = #{x_i <= x} / n                                     #
-    # ------------------------------------------------------------------ #
+    # -------------------------------------------------------------------------
+    #  CDF  —  F(x) = #{x_i <= x} / n
+    # -------------------------------------------------------------------------
     def cdf(self, x: ArrayLike, **kwargs: Any) -> NDArray[np.float64]:
         """Empirical CDF evaluated at x.
 
@@ -94,9 +94,9 @@ class EmpiricalDistribution(Distribution):
         # searchsorted(..., side='right') counts how many values are <= x
         return np.searchsorted(self._data, x, side="right") / self._n
 
-    # ------------------------------------------------------------------ #
-    #  PPF  —  Q(p) = x_{ceil(n*p)}                                        #
-    # ------------------------------------------------------------------ #
+    # -------------------------------------------------------------------------
+    #  PPF  —  Q(p) = x_{ceil(n*p)}
+    # -------------------------------------------------------------------------
     def ppf(self, q: ArrayLike, **kwargs: Any) -> NDArray[np.float64]:
         """Empirical quantile function (inverse CDF).
 
