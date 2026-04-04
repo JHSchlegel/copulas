@@ -92,7 +92,9 @@ class EmpiricalDistribution(Distribution):
         self._check_fitted()
         x = np.asarray(x, dtype=np.float64)
         # searchsorted(..., side='right') counts how many values are <= x
-        return np.searchsorted(self._data, x, side="right") / self._n
+        # we divide by self.n + 1 to ensure the observations are strictly in
+        # (0, 1)
+        return np.searchsorted(self._data, x, side="right") / (self._n + 1)
 
     # -------------------------------------------------------------------------
     #  PPF  —  Q(p) = x_{ceil(n*p)}
