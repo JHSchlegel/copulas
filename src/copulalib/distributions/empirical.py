@@ -51,7 +51,9 @@ class EmpiricalDistribution(Distribution):
     # -------------------------------------------------------------------------
     #  Fitting
     # -------------------------------------------------------------------------
-    def _fit(self, data: ArrayLike, **kwargs: Any) -> EmpiricalDistribution:
+    def _fit(
+        self, data: ArrayLike, **kwargs: dict[str, Any]
+    ) -> EmpiricalDistribution:
         """Sort and store the sample as order statistics.
 
         Parameters
@@ -90,9 +92,15 @@ class EmpiricalDistribution(Distribution):
             Probabilities in [0, 1].
         """
         self._check_fitted()
+        assert self._data is not None
         x = np.asarray(x, dtype=np.float64)
         # searchsorted(..., side='right') counts how many values are <= x
-        return np.searchsorted(self._data, x, side="right") / self._n
+        # we divide by self.n + 1 to ensure the observations are strictly in
+        # (0, 1)
+        return np.asarray(
+            np.searchsorted(self._data, x, side="right") / (self._n + 1),
+            dtype=np.float64,
+        )
 
     # -------------------------------------------------------------------------
     #  PPF  —  Q(p) = x_{ceil(n*p)}
@@ -114,12 +122,13 @@ class EmpiricalDistribution(Distribution):
             Corresponding quantiles.
         """
         self._check_fitted()
+        assert self._data is not None
         q = np.asarray(q, dtype=np.float64)
         if np.any((q < 0) | (q > 1)):
             raise ValueError("q must be in [0, 1].")
         # clip so that q=0 maps to x_(1) and q=1 maps to x_(n)
         idx = np.clip(np.ceil(self._n * q).astype(int) - 1, 0, self._n - 1)
-        return self._data[idx]
+        return np.asarray(self._data[idx], dtype=np.float64)
 
     # -------------------------------------------------------------------------
     #  Sampling  —  sample with replacement
@@ -137,12 +146,27 @@ class EmpiricalDistribution(Distribution):
         NDArray of shape (n,)
         """
         self._check_fitted()
+        assert self._data is not None
         rng: np.random.Generator = kwargs.get("rng", np.random.default_rng())
         return rng.choice(self._data, size=n, replace=True)
 
-    # ------------------------------------------------------------------ #
-    #  Helpers                                                             #
-    # ------------------------------------------------------------------ #
+    # -------------------------------------------------------------------------
+    #  Parameter interface
+    # -------------------------------------------------------------------------
+    @property
+    def params(self) -> dict[str, float | None]:
+        """Empty dict — empirical distribution has no scalar parameters.
+
+        Returns
+        -------
+        dict
+            Always ``{}``.
+        """
+        return {}
+
+    # -------------------------------------------------------------------------
+    #  Helpers
+    # -------------------------------------------------------------------------
     def _check_fitted(self) -> None:
         if self._data is None:
             raise RuntimeError("Call fit() before using this distribution.")

@@ -128,6 +128,47 @@ class Distribution(ABC):
         return np.log(self.pdf(x))
 
     # -------------------------------------------------------------------------
+    # Parameter interface
+    # -------------------------------------------------------------------------
+    @property
+    @abstractmethod
+    def params(self) -> dict[str, float | None]:
+        """Current parameter values as a name-to-value mapping.
+
+        Returns
+        -------
+        dict
+            Parameter names mapped to their current values.
+            Returns an empty dict for non-parametric distributions.
+            Values may be ``None`` before ``fit`` is called.
+        """
+
+    def set_params(self, params: dict[str, float]) -> None:
+        """Override one or more parameters by name.
+
+        Parameters
+        ----------
+        params : dict
+            Mapping from parameter name to new value.  Keys must be
+            a subset of those returned by ``self.params``.
+
+        Raises
+        ------
+        ValueError
+            If any key is not a recognised parameter of this
+            distribution.
+        """
+        allowed = set(self.params)
+        unknown = set(params) - allowed
+        if unknown:
+            raise ValueError(
+                f"{type(self).__name__} has no parameters "
+                f"{sorted(unknown)}."
+            )
+        for key, val in params.items():
+            setattr(self, key, val)
+
+    # -------------------------------------------------------------------------
     # Helpers
     # -------------------------------------------------------------------------
     def _check_fitted(self) -> None:
