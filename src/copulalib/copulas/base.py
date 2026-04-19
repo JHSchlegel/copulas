@@ -208,6 +208,38 @@ class Copula(ABC):
             Copula CDF values.
         """
 
+    def sample_data(
+        self, n: int, **kwargs: Any
+    ) -> NDArray[np.float64]:
+        """Draw samples in the original data space.
+
+        Calls ``sample`` to obtain uniform pseudo-observations, then
+        applies the inverse CDF (PPF) of each fitted marginal.
+
+        Parameters
+        ----------
+        n : int
+            Number of samples.
+
+        Returns
+        -------
+        NDArray of shape (n, d)
+            Samples in the original data space.
+
+        Raises
+        ------
+        RuntimeError
+            If ``fit_marginals`` has not been called yet.
+        """
+        self._check_marginals_fitted()
+        u = self.sample(n, **kwargs)
+        return np.column_stack(
+            [
+                m.distribution.ppf(u[:, i])
+                for i, m in enumerate(self._marginals)
+            ]
+        )
+
     def pdf(self, u: ArrayLike, **kwargs: Any) -> NDArray[np.float64]:
         """Copula density.
 
